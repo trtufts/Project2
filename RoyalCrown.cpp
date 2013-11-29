@@ -5,30 +5,48 @@
 #include <sstream>
 #include <time.h>
 
+/*
+#include GAME1
+#include GAME2
+#include GAME3
+*/
 
 using namespace std;
 display gameDisplay;
 int cardCount;
 int playerBalance;
+int cols;
+int lines;
 
 static void detectResize (int sig); 
-void redrawGame(void);
+void drawGame(void);
 
 int main(int argc, char* argv[]){
 	
+	// initialize the global variables
+	cardCount = 0;
+	playerBalance = 1000;
+	
+	// declare a stringstream to be used for various messages
 	stringstream messageString;
 	
-	signal(SIGWINCH, detectResize); // enable the window resize signal
+	// enable the window resize signal
+	signal(SIGWINCH, detectResize);
+	
+	// various timer variables
+	time_t gameStart;
+	time_t gameEnd;
+	double gameTime1 = 0;
+	double gameTime2 = 0;
+	double gameTime3 = 0;
+	
+	// draw the initial game
+	drawGame();
 	
 	// various variable declarations
 	char key;
 	int cardX = 0;
 	int cardY = 0;
-	int suit = 0;
-	int number = 0;
-
-	int dragX = 0;
-	int dragY = 0;
 	
 	// infinite loop for the main program, you can press ctrl-c to quit
 	for (;;) {
@@ -44,44 +62,36 @@ int main(int argc, char* argv[]){
 				<< gameDisplay.getMouseEventButton();
 			// display a banner message
 			gameDisplay.bannerTop(messageString.str());
+			
 			// record the location of the mouse event
 			cardX = gameDisplay.getMouseEventX();
 			cardY = gameDisplay.getMouseEventY();
-			// Some of the mouse click values are defined in display.h
+			
 			// check if it was a left click
 			if (gameDisplay.getMouseEventButton()&LEFT_CLICK) {
-				// draw a random card at the click location
-				suit = rand()%5;
-				number = rand()%15;
-				gameDisplay.displayCard(cardX,cardY,suit,number, A_BOLD);
+				// Follow the correct option
 			// check if it was a right click
 			} else if (gameDisplay.getMouseEventButton()&RIGHT_CLICK) {
-				// erase a portion of the screen in the shape of a card
-				gameDisplay.eraseBox(cardX,cardY,6,5);
+				// Reject the Right Mouse click
+				messageString.str("");
+				messageString << "Please left click instead of right clicking";
+				gameDisplay.bannerTop(messageString.str());
 			// check for the start of a drag click
 			} else if (gameDisplay.getMouseEventButton()&LEFT_DOWN) {
-				// record start of the drag
-				dragX = cardX;
-				dragY = cardY;
+				// Do nothing at the start of the drag
 			// when the mouse is released
 			} else if (gameDisplay.getMouseEventButton()&LEFT_UP) {
-				// calculate size of the drag
-				int sizeX = abs(dragX-cardX);
-				int sizeY = abs(dragY-cardY);
-				// get to the top left corner of the drag area
-				if (dragX > cardX)
-					dragX = cardX;
-                if (dragY > cardY)
-                    dragY = cardY;
-				// draw a box around the drag area
-				gameDisplay.drawBox(dragX, dragY, sizeX, sizeY, 0);
+				// Reject the drag
+				messageString.str("");
+				messageString << "Please left click instead of drag clicking";
+				gameDisplay.bannerTop(messageString.str());
 			}
 		// if a key was pressed
 		} else if(key > 0) {
-			// make bottom a banner message saying that a key was pressed
+			// Make bottom a banner message saying that a key was pressed and ask for a mouse click
 			messageString.str("");
-			messageString << "Key " << key << " pressed";
-			gameDisplay.bannerBottom(messageString.str());
+			messageString << "Key " << key << " pressed, Please use the mouse to select an option.";
+			gameDisplay.bannerTop(messageString.str());
 		}
 	}
 
@@ -95,18 +105,37 @@ void detectResize(int sig) {
 	// re-enable the interrupt for a window resize
     signal(SIGWINCH, detectResize);
 
-	redrawGame();
+	drawGame();
 }
 
-void redrawGame(void) {
-	// gets the new screen size
-	int cols = gameDisplay.getCols();
-	int lines = gameDisplay.getLines();
-	
-	
-	
-	// Tells the user that the resize was a success
+void drawGame(void) {
 	stringstream messageString;
-	messageString << "Resize successful, Terminal is now " << cols << "x" << lines;
+	// gets the screen size
+	cols = gameDisplay.getCols();
+	lines = gameDisplay.getLines();
+	
+	gameDisplay.eraseBox(0,0,cols,lines);
+	
+	messageString.str("");
+	messageString << "Player has " << playerBalance << " chips. Player has played a total of " << cardCount << " cards.";
+	gameDisplay.bannerBottom(messageString.str());
+	
+	int boxSizeX = cols/2;
+	int boxSizeY = lines/5;
+	
+	gameDisplay.drawBox(cols/4, 1, boxSizeX, boxSizeY, 0);
+	gameDisplay.drawBox(cols/4, 2+boxSizeY, boxSizeX, boxSizeY, 0);
+	gameDisplay.drawBox(cols/4, 3+2*boxSizeY, boxSizeX, boxSizeY, 0);
+	gameDisplay.drawBox(cols/4, 4+3*boxSizeY, boxSizeX, boxSizeY, 0);
+	
+	// Tells the user that the draw was a success, remove after testing
+	messageString.str("");
+	messageString << "Draw successful, Terminal is now " << cols << "x" << lines;
 	gameDisplay.bannerTop(messageString.str());
+	
+	if((lines < 18)||(cols < 65)){
+		messageString.str("");
+		messageString << "Please make the screen at least 65x18, it is currently " << cols << "x" << lines;
+		gameDisplay.bannerTop(messageString.str());
+	}
 }
