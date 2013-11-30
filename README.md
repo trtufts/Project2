@@ -19,15 +19,22 @@ game. A number of other features have also been requested.
 
 
 Features:
+
  A combined executable that allows for the user to select any of the group's card 
 games with a menu system 
+
  A record of time spent playing each game 
+
  A record of the number of cards played by the user in all games 
+
  A credit system with a balance shared between all the games. Credit should be 
 subtracted or added in a sensible manner multiple times while the user is 
 playing the card game. 
+
  An advertising interface that displays a random one line advertisement from an 
 "advertisement.txt" file. This will update every round/turn in the game. 
+
  The game will redraw when the terminal is resized 
+
  You only have to integrate 3 games together (groups of 4 can integrate three 
 games of their choosing) 
