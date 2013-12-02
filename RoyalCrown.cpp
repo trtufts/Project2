@@ -15,7 +15,7 @@
 using namespace std;
 display gameDisplay;
 int cardCount;
-int playerBalance;
+double playerBalance;
 int cols;
 int lines;
 double gameTime1;
