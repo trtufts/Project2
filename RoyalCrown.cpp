@@ -190,19 +190,19 @@ void drawGame(void) {
 
 	// Game 1, Time 1
 	messageString.str("");
-	messageString << "Game 1 - Time Played: " << gameTime1;
+	messageString << "Gin Rummy - Time Played: " << gameTime1;
 	spaceSize = cols/4 + 1;
 	mvprintw(1 + boxSizeY/2, spaceSize, "%s", messageString.str().c_str());
 	
 	// Game 2, Time 2
 	messageString.str("");
-	messageString << "Game 2 - Time Played: " << gameTime2;
+	messageString << "Go Fish - Time Played: " << gameTime2;
 	spaceSize = cols/4 + 1;
 	mvprintw(2 + 3*boxSizeY/2, spaceSize, "%s", messageString.str().c_str());
 	
 	// Game 3, Time 3
 	messageString.str("");
-	messageString << "Game 3 - Time Played: " << gameTime3;
+	messageString << "Poker - Time Played: " << gameTime3;
 	spaceSize = cols/4 + 1;
 	mvprintw(3 + 5*boxSizeY/2, spaceSize, "%s", messageString.str().c_str());
 	
