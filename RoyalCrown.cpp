@@ -6,11 +6,11 @@
 #include <time.h>
 #include <stdio.h>
 
-/*
-#include GAME1
-#include GAME2
-#include GAME3
-*/
+
+#include "ginGame.cpp"
+//#include "GoFishmain.cpp"
+//#include "pokerMain.cpp"
+
 
 using namespace std;
 display gameDisplay;
@@ -77,10 +77,7 @@ int main(int argc, char* argv[]){
 					// If the player clicks inside the game1 box
 					if( (1 <= cardY) && (cardY <= boxSizeY) ){
 						time(&gameStart);
-						messageString.str("");
-						messageString << "You have selected Game 1";
-						gameDisplay.bannerTop(messageString.str());
-						sleep(5);
+						gin();
 						time(&gameEnd);
 						gameTime1 += difftime(gameEnd, gameStart);
 						drawGame();
@@ -88,10 +85,7 @@ int main(int argc, char* argv[]){
 					// If the player clicks inside the game2 box
 					} else if( (2+boxSizeY <= cardY) && (cardY <= 1+2*boxSizeY) ){
 						time(&gameStart);
-						messageString.str("");
-						messageString << "You have selected Game 2";
-						gameDisplay.bannerTop(messageString.str());
-						sleep(5);
+						//goFish();
 						time(&gameEnd);
 						gameTime2 += difftime(gameEnd, gameStart);
 						drawGame();
@@ -99,10 +93,7 @@ int main(int argc, char* argv[]){
 					// If the player clicks inside the game3 box
 					} else if( (3+2*boxSizeY <= cardY) && (cardY <= 2+3*boxSizeY) ){
 						time(&gameStart);
-						messageString.str("");
-						messageString << "You have selected Game 3";
-						gameDisplay.bannerTop(messageString.str());
-						sleep(5);
+						//poker();
 						time(&gameEnd);
 						gameTime3 += difftime(gameEnd, gameStart);
 						drawGame();
