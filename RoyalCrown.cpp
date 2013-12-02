@@ -7,9 +7,9 @@
 #include <stdio.h>
 
 
-#include "ginGame.cpp"
-//#include "GFmain.cpp"
-//#include "pokerMain.cpp"
+#include "ginGame.h"
+//#include "GFmain.h"
+//#include "pokerMain.h"
 
 
 using namespace std;
