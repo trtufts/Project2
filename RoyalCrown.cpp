@@ -8,8 +8,8 @@
 
 
 #include "ginGame.h"
-//#include "GFmain.h"
-//#include "pokerMain.h"
+#include "GFmain.h"
+#include "pokerMain.h"
 
 
 using namespace std;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
 					// If the player clicks inside the game2 box
 					} else if( (2+boxSizeY <= cardY) && (cardY <= 1+2*boxSizeY) ){
 						time(&gameStart);
-						//goFish();
+						goFish();
 						time(&gameEnd);
 						gameTime2 += difftime(gameEnd, gameStart);
 						drawGame();
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]){
 					// If the player clicks inside the game3 box
 					} else if( (3+2*boxSizeY <= cardY) && (cardY <= 2+3*boxSizeY) ){
 						time(&gameStart);
-						//poker();
+						poker();
 						time(&gameEnd);
 						gameTime3 += difftime(gameEnd, gameStart);
 						drawGame();
