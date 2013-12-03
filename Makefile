@@ -1,8 +1,10 @@
+# This is an example makefile
+# It is very important to add -lncursesw for the ncurses library
 CC=g++
 DEBUG=
-CFLAGS=-c -Wall $(DEBUG)
+CFLAGS=-c $(DEBUG)
 LDFLAGS=-lncursesw $(DEBUG)
-SOURCES=display.cpp RoyalCrown.cpp
+SOURCES=display.cpp ginPlayer.cpp ginHuman.cpp ginComputer.cpp ginCard.cpp ginDeck.cpp ginScoring.cpp ginGame.h RoyalCrown.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=RoyalCrown
 

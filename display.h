@@ -5,12 +5,16 @@
 
 // These are include files they are used for accessing functions and
 // variables in external libraries.
+#ifndef DISPLAY_H
+#define DISPLAY_H
+
 #include <ncursesw/ncurses.h>
 #include <iostream>
 #include <cstdio>
+#include <string>
 
-// This is the namespace std, without this you would need to add "std::" 
-// infront of every variable and function from the std library. 
+// This is the namespace std, without this you would need to add "std::"
+// infront of every variable and function from the std library.
 using namespace std;
 
 // These Mouse Mask Definitions are for some of the common mouse buttons
@@ -47,7 +51,7 @@ public:
 	*/
 	display(void);
 	/* "destructor"
-	* This function is called just before a object is deleted. Put clean up 
+	* This function is called just before a object is deleted. Put clean up
 	* functions in here.
 	*/
 	~display(); // destructor
@@ -56,20 +60,31 @@ public:
 	int captureInput(void);
 	// stores new screensize on update
 	void handleResize(int sig);
+	string bannerArray[20];
+	int bannerIndex;
 
 	/*
 	 * Drawing commands
      */
     // display a card on the screen
-	void displayCard(int x, int y, int suit, int number, int printAtt);
+	void displayginCard(int x, int y, int suit, int number, int printAtt);
 	// erase in the shape of a box on the screen
 	void eraseBox(int x, int y, int sizeX, int sizeY);
 	// draw a box on the screen
-	void drawBox(int x, int y, int sizeX, int sizeY, int printAtt); 
+	void drawBox(int x, int y, int sizeX, int sizeY, int printAtt);
+	// draw an invisible box on the screen
+	void drawBoxInvis(int x, int y, int sizeX, int sizeY, int printAtt);
 	// display banner text at the bottom of the screen
 	void bannerBottom(string bannerText);
+
+	void bannerBet(string bannerText);
+	void bannerBetClear(string bannerText);
+	void backgroundWhite();
+
 	// display banner text at the top of the screen
 	void bannerTop(string bannerText);
+
+	void displayText(string text, int locX, int locY);
 
 	// get information about the display
 	int getCols(void) {return cols;}
@@ -84,6 +99,7 @@ public:
 	// sets an offset for when cards clip the bottom of the screen
 	void setBottomOffset(int offset) {lineBoundaryOffset=offset;}
 
+	void clearDisplay();
 private:
 	// These are private functions and variables used inside of display.
 	// You should not try to access these from outside the display class.
@@ -92,9 +108,11 @@ private:
 	void printNumber(int number);
 
 	int cols;
-	int lines;	
+	int lines;
 	int mouseEventX;
 	int mouseEventY;
 	int	mouseEventButton;
 	int lineBoundaryOffset;
 };
+
+#endif

@@ -2,13 +2,10 @@
  * Author: John Shield
  * Description: Defines the functionality of the user interface.
  *
- * NOTES: 
+ * NOTES:
  *		* Requires the terminal (Putty) to be set to UTF-8.
  *		* Does not function when running a screen session.
  */
-
-#ifndef DISPLAY_CPP
-#define DISPLAY_CPP
 
 #include <iostream>
 #include <sys/ioctl.h>
@@ -37,16 +34,19 @@ display::display(void) {
 	clear();
 	// turn off the keyboard echo (reqiured while drawing)
 	noecho();
-	// Change to character mode (so individual characters are being read at a 
+	// Change to character mode (so individual characters are being read at a
 	// time rather than waiting for a carriage return).
-	cbreak(); 
-	// Allows for function keys to be used (also nessacary for getting the mouse 
-	// movement working).	
+	cbreak();
+	// Allows for function keys to be used (also nessacary for getting the mouse
+	// movement working).
 	keypad(stdscr, TRUE);
-	// set which mouse events are captured 
-	mousemask(ALL_MOUSE_EVENTS, NULL); 
-	// Setting the timeout for the capture input values are in 1/10ths of a second.	
-	halfdelay(5); 
+	// set which mouse events are captured
+	mousemask(ALL_MOUSE_EVENTS, NULL);
+	// Setting the timeout for the capture input values are in 1/10ths of a second.
+	halfdelay(5);
+
+	curs_set(0);
+
 
 	// setup the screen size settings.
 	cols = 80;
@@ -57,12 +57,15 @@ display::display(void) {
 	lineBoundaryOffset = 1;
 
 	// Settings for card colors (these can be set outside of the display class)
-	init_pair(1, COLOR_CYAN, COLOR_BLACK); // for card outline
-	init_pair(2, COLOR_BLUE, COLOR_BLACK); // for spades and clubs
-	init_pair(3, COLOR_RED, COLOR_BLACK);  // for hearts and diamonds
-	init_pair(4, COLOR_GREEN, COLOR_BLACK); // for turned over card
+	init_pair(1, COLOR_BLACK, COLOR_WHITE); // for card outline
+	init_pair(2, COLOR_BLACK, COLOR_WHITE); // for spades and clubs
+	init_pair(3, COLOR_RED, COLOR_WHITE);  // for hearts and diamonds
+	init_pair(4, COLOR_BLUE, COLOR_WHITE); // for turned over card
 	init_pair(5, COLOR_GREEN, COLOR_BLACK); // for box drawing
-	init_pair(6, COLOR_GREEN, COLOR_BLACK); // for banner display
+	init_pair(6, COLOR_BLUE, COLOR_BLACK); // for banner display
+	init_pair(7, COLOR_BLACK, COLOR_WHITE); // for text display
+	init_pair(8, COLOR_WHITE, COLOR_BLACK); // for banner clear display
+	init_pair(9, COLOR_BLACK, COLOR_BLACK); // for invisible cards
 }
 
 /* Function: This is the destructor.
@@ -70,14 +73,14 @@ display::display(void) {
  */
 display::~display() {
 	// this is turns off all the special settings and returns the terminal to normal
-	endwin(); 
+	endwin();
 	// insert deletion of dynamically created objects here too
 }
 
 /*
  * Function: This captures all the userinput.
  * Description: It captures mouse and keyboard events.
- * 		Returns "Positive Number" 
+ * 		Returns "Positive Number"
  *			- for user keypress
  *			- this is a character code typed
  * 		Returns "0" - for no user input
@@ -87,9 +90,9 @@ display::~display() {
  *			- details of the mouse event must be fetched from this class
  *			- use getMouseEventX, getMouseEventY and getMouseEventButton
  */
-int display::captureInput(void) {	
+int display::captureInput(void) {
 	// obtain one mouse event or keypress
-	int ch=getch(); 
+	int ch=getch();
     // this is a switch statement for the result of getch
 	switch (ch) {
     case KEY_MOUSE: // this occurs when an mouse event occurs
@@ -141,7 +144,7 @@ void display::handleResize(int sig) {
  * Function: Displays various cards on the game screen
  * Description: This function displays various playing cards on the screen.
  *		The first two arguments are the x and y coordinates of the top left corner
- * 		of the card. 
+ * 		of the card.
  *			The suit values are: 1=spades, 2=hearts, 3=clubs, 4=diamonds
  * 			The numbers are: 1=Ace, 2-10=2-10, 11=Jack, 12=Queen, 13=King, 14=Joker
  *		Any suit and number that do not match the valid numberrs generates a face down
@@ -158,16 +161,18 @@ void display::handleResize(int sig) {
  *				A_INVIS         Invisible or blank mode
  *				A_ALTCHARSET    Alternate character set
  *				A_CHARTEXT      Bit-mask to extract a character
- *				COLOR_PAIR(n)   Color-pair number n 
+ *				COLOR_PAIR(n)   Color-pair number n
  */
-void display::displayCard(int x, int y, int suit, int number, int printAtt) {
+void display::displayginCard(int x, int y, int suit, int number, int printAtt) {
 
 	// Ncurses drawing settings
 	attron(COLOR_PAIR(1) | printAtt);
+
 	// prevent draw if it off the screen
 	if (x>=0 && y>=0 && x<cols-6 && y<lines-lineBoundaryOffset) {
 		// print the top lines of the card
 		mvprintw(y,x,"\u250c\u2500\u2500\u2500\u2500\u2510");
+		//mvprintw(y,x,"      ");
 		// the next 4 if statements prevent draw if it is over the bottom of the screen
 		if (y<lines-1-lineBoundaryOffset) {
 			move(y+1,x); // move command
@@ -181,11 +186,13 @@ void display::displayCard(int x, int y, int suit, int number, int printAtt) {
 			move(y+3,x); // move command
 			printFace(suit,number,2, printAtt); // call function to print card face
 		}
-		if (y<lines-4-lineBoundaryOffset) { 
+		if (y<lines-4-lineBoundaryOffset) {
 			// prints the bottom lines of the card
 			mvprintw(y+4,x,"\u2514\u2500\u2500\u2500\u2500\u2518");
+			//mvprintw(y+4,x,"      ");
 		}
 	}
+
 	// Ncurses turn off the drawing settings
 	attroff(COLOR_PAIR(1) | printAtt);
 }
@@ -195,9 +202,10 @@ void display::displayCard(int x, int y, int suit, int number, int printAtt) {
  * Description: This copies suit, number and printAtt from the calling function.
  *		Also includes what line of the card face is being drawn.
  */
-void display::printFace(int suit, int number, int line, int printAtt) {	
+void display::printFace(int suit, int number, int line, int printAtt) {
 	// draw left edge of the card
 	printw("\u2502");
+	//printw(" ");
 
 	if (suit==2 || suit==4) { // Red for Hearts and Diamonds
 		attron(COLOR_PAIR(3) | printAtt);
@@ -220,7 +228,7 @@ void display::printFace(int suit, int number, int line, int printAtt) {
 			printNumber(number); // function to draw number
 			if (number!=10)
 				printw(" ");
-			printw(" ");	
+			printw(" ");
 		} else if (line==2) {
 			if (number!=10)
                 printw(" ");
@@ -237,7 +245,7 @@ void display::printFace(int suit, int number, int line, int printAtt) {
 		if (line==0)
 			printw("%s  %s", spades, hearts);
 		if (line==1)
-            printw("Play");
+            printw(" SK ");
 		if (line==2)
 			printw("%s  %s", diamonds, clubs);
 		attroff(COLOR_PAIR(1) | printAtt);
@@ -247,11 +255,12 @@ void display::printFace(int suit, int number, int line, int printAtt) {
     attron(COLOR_PAIR(1) | printAtt);
 	// print the right edge of the card
 	printw("\u2502");
+	//printw(" ");
 }
 
 /*
  * Function: Print the suit of the card
- * Description: This is just a look up table. 
+ * Description: This is just a look up table.
  */
 void display::printSuit(int suit) {
 	switch (suit) {
@@ -335,7 +344,7 @@ void display::eraseBox(int x, int y, int sizeX, int sizeY) {
 		strDraw = "";
 		// check that x is not off the screen
 		if (x<=cols && x >= 0) {
-			// make a string needed for box width	
+			// make a string needed for box width
 			strDraw.append(maxSizeX,' ');
 			// print the line of the box
 			mvprintw(y+yCount,x,"%s",strDraw.c_str());
@@ -355,7 +364,7 @@ void display::drawBox(int x, int y, int sizeX, int sizeY, int printAtt) {
     int yCount;
 
 	// set the box setting colors on
-	attron(COLOR_PAIR(5) | printAtt);    
+	attron(COLOR_PAIR(5) | printAtt);
 
 	// for the box height being drawn loop
     for (yCount=0; yCount<sizeY;yCount++) {
@@ -408,6 +417,70 @@ void display::drawBox(int x, int y, int sizeX, int sizeY, int printAtt) {
 }
 
 /*
+ * Function: Draws an invisible box on the screen
+ * Description: x,y is for the top left corner, sizeX and sizeY set
+ *          how big the square is. printAtt allows for changes in the
+ *			display settings.
+ */
+void display::drawBoxInvis(int x, int y, int sizeX, int sizeY, int printAtt) {
+	string strDraw;
+    int ii;
+    int yCount;
+
+	// set the box setting colors on
+	attron(COLOR_PAIR(9) | printAtt);
+
+	// for the box height being drawn loop
+    for (yCount=0; yCount<sizeY;yCount++) {
+		// break loop if the drawing is offscreen
+        if (yCount+y > lines-lineBoundaryOffset || y < 0)
+            break;
+		// if x is on the screen
+        if (x<=cols) {
+			strDraw = "";
+			// for the box width loop
+            for (ii=0;ii<sizeX;ii++){
+				// stop drawing if the x is offscreen
+                if (ii+x > cols || x < 0)
+                    break;
+				// first line
+                if (yCount==0) {
+                    if (ii==0) {
+						strDraw.append("\u250c"); // left
+                    } else if (ii==sizeX-1) {
+						strDraw.append("\u2510"); // right
+                    } else {
+						strDraw.append("\u2500"); // middle
+                    }
+				// last line
+                } else if (yCount==sizeY-1) {
+                    if (ii==0) {
+                        strDraw.append("\u2514"); // left
+                    } else if (ii==sizeX-1) {
+                        strDraw.append("\u2518"); // right
+                    } else {
+                        strDraw.append("\u2500"); // middle
+                    }
+				// other lines
+                } else {
+                    if (ii==0) {
+                        strDraw.append("\u2502"); // left
+                    } else if (ii==sizeX-1) {
+                        strDraw.append("\u2502"); // right
+                    } else {
+                        strDraw.append(" "); // middle
+                    }
+                }
+			}
+			// print the line that was created
+			mvprintw(y+yCount,x,"%s",strDraw.c_str());
+        }
+    }
+	// turn off the attribute colors
+	attroff(COLOR_PAIR(9) | printAtt);
+}
+
+/*
  * Function: Draws a banner of text at the bottom right of the screen
  * Description: Inverts the color and draws the banner at the bottom
  *		of the screen. Does not handle carriage returns on the string.
@@ -432,6 +505,55 @@ void display::bannerBottom(string bannerText) {
 	attroff(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
 }
 
+void display::bannerBet(string bannerText) {
+	// change to the banner draw settings
+	attron(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
+	// checks if the banner string size is smaller than the width of the screen
+    if((unsigned)cols > bannerText.size()) {
+		// moves the cursor to the bottom of the screen
+		move(lines-2,0);
+		// fill in extra space to the banner text is right adjusted
+        hline(' ',cols - bannerText.size());
+		// prints out the banner text
+		mvprintw(lines-2,cols-bannerText.size(),"%s", bannerText.c_str());
+	// if banner string size is larger than width of screen
+	} else {
+		// clip the banner text so it doesn't wrap over to the next line
+		mvprintw(lines-2,0,"%s", (bannerText.substr(0,cols)).c_str());
+	}
+	// turn off the draw colors
+	attroff(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
+}
+
+void display::bannerBetClear(string bannerText) {
+	// change to the banner draw settings
+	attron(COLOR_PAIR(7) | A_REVERSE | A_BOLD);
+	// checks if the banner string size is smaller than the width of the screen
+    if((unsigned)cols > bannerText.size()) {
+		// moves the cursor to the bottom of the screen
+		move(lines-2,0);
+		// fill in extra space to the banner text is right adjusted
+        hline(' ',cols - bannerText.size());
+		// prints out the banner text
+		mvprintw(lines-2,cols-bannerText.size(),"%s", bannerText.c_str());
+	// if banner string size is larger than width of screen
+	} else {
+		// clip the banner text so it doesn't wrap over to the next line
+		mvprintw(lines-2,0,"%s", (bannerText.substr(0,cols)).c_str());
+	}
+	// turn off the draw colors
+	attroff(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
+}
+
+void display::backgroundWhite() {
+	attron(COLOR_PAIR(8) | A_REVERSE | A_BOLD);
+	for(int line = 0; line < lines; line++) {
+		move(line,0);
+		hline(' ',cols);
+		mvprintw(line,cols,"%s", "");
+	}
+}
+
 /*
  * Function: Draws a banner of text at the top left of the screen
  * Description: Inverts the color and draws the banner at the top
@@ -439,7 +561,7 @@ void display::bannerBottom(string bannerText) {
  */
 void display::bannerTop(string bannerText) {
 	// change to the banner draw settings
-	attron(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
+	attron(COLOR_PAIR(7) | A_REVERSE | A_BOLD);
 	// checks if the banner string size is smaller than the width of the screen
     if((unsigned)cols > bannerText.size()) {
 		// moves the cursor to the bottom of the screen
@@ -451,10 +573,41 @@ void display::bannerTop(string bannerText) {
 	// if banner string size is larger than width of screen
 	} else {
 		// clip the banner text so it doesn't wrap over to the next line
-		mvprintw(0,0,"%s", (bannerText.substr(0,cols)).c_str());
+		mvprintw(0,0,"%s", (bannerText).c_str());
 	}
 	// turn off the draw colors
-	attroff(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
+	attroff(COLOR_PAIR(7) | A_REVERSE | A_BOLD);
 }
 
-#endif
+void display::displayText(string text, int locX, int locY) {
+
+	if(locY > (unsigned)lines-1) {
+		return;
+	}
+
+	if(locX + text.size() > (unsigned)cols-1) {
+		return;
+	}
+
+	// change to the banner draw settings
+	attron(COLOR_PAIR(7) | A_REVERSE | A_BOLD);
+	// checks if the banner string size is smaller than the width of the screen
+    if((unsigned)cols > text.size()) {
+		// moves the cursor to the bottom of the screen
+		move(locY,locX);
+		// prints out the banner text
+		printw("%s", text.c_str());
+		// fill in extra space after the banner text
+        hline(' ',cols - text.size());
+	// if banner string size is larger than width of screen
+	} else {
+		// clip the banner text so it doesn't wrap over to the next line
+		//mvprintw(locY,locX,"%s", (text).c_str());
+	}
+	//turn off the draw colors
+	attroff(COLOR_PAIR(7) | A_REVERSE | A_BOLD);
+}
+
+void display::clearDisplay() {
+	clear();
+}
