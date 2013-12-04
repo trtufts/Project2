@@ -1,7 +1,7 @@
 //ginCard.h
 
-#ifndef CARD_H
-#define CARD_H
+#ifndef GCARD_H
+#define GCARD_H
 
 using namespace std;
 

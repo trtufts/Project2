@@ -1,5 +1,5 @@
-#ifndef HUMAN_H
-#define HUMAN_H
+#ifndef GHUMAN_H
+#define GHUMAN_H
 
 #include "ginDeck.h"
 #include "ginPlayer.h"

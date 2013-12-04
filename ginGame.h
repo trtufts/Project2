@@ -1,5 +1,5 @@
-#ifndef GIN
-#define GIN
+#ifndef GIN_H
+#define GIN_H
 
 
 #include <signal.h>
@@ -45,6 +45,20 @@ extern double playerBalance;
 
 
 int gin(){
+
+    	// Settings for card colors (these can be set outside of the display class)
+	init_pair(1, COLOR_BLACK, COLOR_WHITE); // for card outline
+	init_pair(2, COLOR_BLACK, COLOR_WHITE); // for spades and clubs
+	init_pair(3, COLOR_RED, COLOR_WHITE);  // for hearts and diamonds
+	init_pair(4, COLOR_BLUE, COLOR_WHITE); // for turned over card
+	init_pair(5, COLOR_GREEN, COLOR_BLACK); // for box drawing
+	init_pair(6, COLOR_BLUE, COLOR_BLACK); // for banner display
+	init_pair(7, COLOR_BLACK, COLOR_WHITE); // for text display
+	init_pair(8, COLOR_WHITE, COLOR_BLACK); // for banner clear display
+	init_pair(9, COLOR_BLACK, COLOR_BLACK); // for invisible cards
+
+
+
 
     int cols = gameDisplay.getCols();
 	int lines = gameDisplay.getLines();

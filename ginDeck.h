@@ -1,6 +1,6 @@
 //ginDeck.h
-#ifndef DECK_H
-#define DECK_H
+#ifndef GDECK_H
+#define GDECK_H
 #include "ginCard.h"
 
 

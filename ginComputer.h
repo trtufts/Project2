@@ -1,5 +1,5 @@
-#ifndef COMPUTER_H
-#define COMPUTER_H
+#ifndef GCOMPUTER_H
+#define GCOMPUTER_H
 
 #include "ginDeck.h"
 #include "ginPlayer.h"

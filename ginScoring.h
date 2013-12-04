@@ -1,5 +1,5 @@
-#ifndef SCORING_H
-#define SCORING_H
+#ifndef GSCORING_H
+#define GSCORING_H
 
 #include "ginPlayer.h"
 #include "display.h"

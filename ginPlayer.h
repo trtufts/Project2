@@ -1,5 +1,5 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef GPLAYER_H
+#define GPLAYER_H
 #include "ginCard.h"
 #include "ginDeck.h"
 #include <string>

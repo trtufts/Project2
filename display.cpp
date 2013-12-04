@@ -7,12 +7,31 @@
  *		* Does not function when running a screen session.
  */
 
+
+//BRIAN HICKEY 2013
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <iostream>
 #include <sys/ioctl.h>
 #include <cstdio>
 #include <unistd.h>
 #include <locale.h>
 #include <ncursesw/ncurses.h>
+#include <sstream>
+
+
 
 #include "display.h"
 
@@ -56,16 +75,14 @@ display::display(void) {
 	// set a no card draw offset of 1 so the bottom banner is not overwritten
 	lineBoundaryOffset = 1;
 
-	// Settings for card colors (these can be set outside of the display class)
-	init_pair(1, COLOR_BLACK, COLOR_WHITE); // for card outline
-	init_pair(2, COLOR_BLACK, COLOR_WHITE); // for spades and clubs
-	init_pair(3, COLOR_RED, COLOR_WHITE);  // for hearts and diamonds
-	init_pair(4, COLOR_BLUE, COLOR_WHITE); // for turned over card
+    init_pair(1, COLOR_CYAN, COLOR_BLACK); // for card outline
+	init_pair(2, COLOR_BLUE, COLOR_BLACK); // for spades and clubs
+	init_pair(3, COLOR_RED, COLOR_BLACK);  // for hearts and diamonds
+	init_pair(4, COLOR_GREEN, COLOR_BLACK); // for turned over card
 	init_pair(5, COLOR_GREEN, COLOR_BLACK); // for box drawing
-	init_pair(6, COLOR_BLUE, COLOR_BLACK); // for banner display
-	init_pair(7, COLOR_BLACK, COLOR_WHITE); // for text display
-	init_pair(8, COLOR_WHITE, COLOR_BLACK); // for banner clear display
-	init_pair(9, COLOR_BLACK, COLOR_BLACK); // for invisible cards
+	init_pair(6, COLOR_GREEN, COLOR_BLACK); // for banner display
+
+
 }
 
 /* Function: This is the destructor.
@@ -611,3 +628,357 @@ void display::displayText(string text, int locX, int locY) {
 void display::clearDisplay() {
 	clear();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void display::displayHumCards(int *cardsInHand) {
+        int x = 30;
+        int y = 26;
+        int suit, number, i, card;
+        for(i=0; i<52; i++){
+                if(cardsInHand[i] != -1){
+                        card = cardsInHand[i];
+                        number = card%13;
+                        if(number == 0){
+                                number = 13;
+                                suit = (card/13)+1;
+                        }
+                        else
+                                suit = card/13;
+                        displayCard(x, y, suit+1, number, A_BOLD);
+                        x += 6;
+                }
+                else if(cardsInHand[i] == -1)
+                ;
+        }
+}
+
+void display::displayP1Cards(int *cardsInHand) {
+        int x = 30;
+        int y = 31;
+        int suit, number, i, card;
+        for(i=0; i<52; i++){
+                if(cardsInHand[i] != -1){
+                        card = cardsInHand[i];
+                        number = card%13;
+                        if(number == 0){
+                                number = 13;
+                                suit = (card/13)+1;
+                        }
+                        else
+                                suit = card/13;
+                        displayCard(x, y, suit+1, number, A_BOLD);
+                        x += 6;
+                }
+                else if(cardsInHand[i] == -1)
+                ;
+                        //break;
+        }
+}
+
+void display::displayPair(int x, int y, int suit, int number, int printAtt) {
+        displayCard(x, y, suit, number, printAtt);
+        displayCard(x-1, y-1, suit, number, printAtt);
+}
+
+void display::updateScreen(int deckCards, int comp1Cards,
+int comp2Cards, int comp3Cards, int *comp1Score, int *comp2Score,
+int *comp3Score, int *humanScore){
+        int comp1score = 0;
+        int comp2score = 0;
+        int comp3score = 0;
+        int humanscore = 0;
+        for(int i=0; i<13; i++){
+                if(comp1Score[i] == 1)
+                        comp1score++;
+                if(comp2Score[i] == 1)
+                        comp2score++;
+                if(comp3Score[i] == 1)
+                        comp3score++;
+                if(humanScore[i] == 1)
+                        humanscore++;
+        }
+        displayCard(57,18,5,0,A_BOLD);
+        mvprintw(20,65, "Remaining Cards: %d", deckCards);
+        mvprintw(5,65, "Computer 2");
+        mvprintw(8,73, "Cards: %d", comp2Cards);
+        mvprintw(11,67, "Score: %d", comp2score);
+        mvprintw(15,7, "Computer 1");
+        mvprintw(19,14, "Cards: %d", comp1Cards);
+        mvprintw(22,8,"Score: %d", comp1score);
+        mvprintw(15,113, "Computer 3");
+        mvprintw(18, 121, "Cards: %d", comp3Cards);
+        mvprintw(21, 115, "Score: %d", comp3score);
+        mvprintw(2,67, "GO FISH");
+        mvprintw(24,65, "Player");
+        mvprintw(25,65, "Score: %d", humanscore);
+        displayCard(8, 17, 5, 0 , A_BOLD);
+        displayCard(67,6,5,0,A_BOLD);
+        displayCard(115,16,5,0,A_BOLD);
+        mvprintw(36,0, "\n");
+        refresh();
+}
+
+
+
+
+void display::displayCard(int x, int y, int suit, int number, int printAtt) {
+
+	// Ncurses drawing settings
+	attron(COLOR_PAIR(1) | printAtt);
+	// prevent draw if it off the screen
+	if (x>=0 && y>=0 && x<cols-6 && y<lines-lineBoundaryOffset) {
+		// print the top lines of the card
+		mvprintw(y,x,"\u250c\u2500\u2500\u2500\u2500\u2510");
+		// the next 4 if statements prevent draw if it is over the bottom of the screen
+		if (y<lines-1-lineBoundaryOffset) {
+			move(y+1,x); // move command
+			printFace(suit,number,0, printAtt); // call function to print card face
+		}
+		if (y<lines-2-lineBoundaryOffset) {
+			move(y+2,x); // move command
+			printFace(suit,number,1, printAtt); // call function to print card face
+		}
+		if (y<lines-3-lineBoundaryOffset) {
+			move(y+3,x); // move command
+			printFace(suit,number,2, printAtt); // call function to print card face
+		}
+		if (y<lines-4-lineBoundaryOffset) {
+			// prints the bottom lines of the card
+			mvprintw(y+4,x,"\u2514\u2500\u2500\u2500\u2500\u2518");
+		}
+	}
+	// Ncurses turn off the drawing settings
+	attroff(COLOR_PAIR(1) | printAtt);
+}
+
+
+
+
+void display::dividerBanner() {
+	// change to the banner draw settings
+	attron(COLOR_PAIR(7) | A_REVERSE | A_BOLD);
+
+	//move cursor to halfway and draw divider
+	move(double(lines)/2-1,0);
+	int column = double(cols)-double(cols)*.3;
+	hline(' ',column);
+
+	//makes the vertical divider
+	for(int i = 0; i <= cols; i++)
+	{
+		mvprintw(i,column, "%s","  ");
+	}
+
+	//makes the divider for the message update
+	//move(double(lines)-double(lines)*.1,column);
+	//hline(' ',column);
+
+	//makes the divider for the pot
+	move(double(lines)*.15,column);
+	hline(' ',column);
+
+	// turn off the draw colors:
+	attroff(COLOR_PAIR(6) | A_REVERSE | A_BOLD);
+	move(double(lines)/2+lines*.1,column/2-8);
+	printw("%s", "Computer Player");
+	// prints out the banner text
+	move(lines*.1,column/2-7);
+	printw("%s", "Human Player");
+}
+void display::potBanner(double pot){
+	string s = "The Pot:            $";
+	move(3, cols-45);
+	printw("%s%.2f", s.c_str(),pot);
+}
+
+void display::adBanner(string ad){
+	move(1, 1);
+	printw("%s", ad.c_str());
+}
+
+void display::moneyBanners(double hum, double comp)
+{
+	int column = double(cols)-double(cols)*.3;
+	move(double(lines)/2+lines*.15,column/2-5);
+	printw("%c%.2f",'$', comp);
+
+	// prints out the banner text
+	move(lines*.15,column/2-5);
+	printw("%c%.2f",'$', hum);
+}
+void display::winBanner(string bannerText)
+{
+
+	mvprintw(lines-25,cols-bannerText.size()-25,"%s", bannerText.c_str());
+}
+void display::outputText(string bannerText, int y, int x)
+{
+	move(y,x);
+	printw("%s", bannerText.c_str());
+}
+void display::clearText()
+{
+	int y = double(lines)*.15+3;
+	for(int i = y; i <= lines-1; i++)
+	{
+		int column = double(cols)-double(cols)*.3;
+		move(i,column+5);
+		hline(' ',cols);
+	}
+}
+void display::moveCursur(int y, int x)
+{
+    move(y,x);
+}
+
+void display::pause()
+{
+    char key;
+    for(;;){
+        move(lines-3,cols-45);
+        printw("Please click a key to continue...");
+        key = this->captureInput();
+        if(key >=-1){
+            break;
+        }
+    }
+    move(lines-3,cols-45);
+    printw("                                 ");
+}
+char display::getKey()
+{
+    char key;
+    move(lines-3,cols-45);
+    hline(' ',cols);
+
+    for(;;){
+        move(lines-3,cols-45);
+        printw("Please enter your response...    ");
+        key = this->captureInput();
+        if(key>0){
+			return key;
+        }
+    }
+}
+string display::getKey1(int n)
+{
+    int i = 0;
+    string s = "";
+    char key;
+    move(lines-3,cols-45);
+    hline(' ',cols);
+
+    for(;;){
+        string temp = "";
+        move(lines-3,cols-45);
+        printw("Please enter your response...    ");
+        key = this->captureInput();
+        if(key=='1'||key=='2'||key=='3'||key=='4'||key=='5'){
+			stringstream ss;
+			ss << key;
+			ss >> temp;
+			s = s+temp;
+			printw("%s", s.c_str());
+			i++;
+        }
+        if(i==n){
+			stringstream st;
+			st >> temp;
+			s = s+ temp;
+			return s;
+		}
+    }
+}
+double display::getInput(string message)
+{
+
+	double d;
+	char key;
+	string s;
+	move(lines-3,cols-45);
+	hline(' ',cols);
+
+	for(;;)/* if valid input was not entered */
+	{
+		string temp;
+		move(lines-3,cols-45);
+		printw("%s", message.c_str());
+		key = this->captureInput();
+		if((key >=48 && key <= 57) || (key == 46)){
+			stringstream ss;
+			ss << key;
+			ss >> temp;
+			s = s+temp;
+			printw("%s", s.c_str());
+		}
+		else if(key == '\n'){
+			stringstream st;
+			st << '\0';
+			st >> temp;
+			s = s+ temp;
+			break;
+		}
+	}
+	printw("%s", s.c_str());
+	stringstream su(s);
+	su >> d;
+	return d;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

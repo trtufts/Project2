@@ -60,12 +60,50 @@ public:
 	int captureInput(void);
 	// stores new screensize on update
 	void handleResize(int sig);
+
+
+
+
+	        void displayPair(int x, int y, int suit, int number, int printAtt);
+        void displayHumCards(int *cardsInHand);
+        void displayP1Cards(int *cardsInHand);
+        void updateScreen(int deckCards, int comp1Cards, int
+comp2Cards,int comp3Cards, int *comp1Score, int *comp2Score, int
+*comp3Score, int *humanScore);
+
+	void dividerBanner();
+	void potBanner(double pot);
+	void adBanner(string ad);
+	void moneyBanners(double hum, double comp);
+	void winBanner(string bannerText);
+	void outputText(string bannerText, int y, int x);
+	void clearText();
+	void moveCursur(int y, int x);
+	void pause();
+	char getKey();
+	string getKey1(int n);
+	double getInput(string message);
+
+
+
+
+
+
+
+
+
+
 	string bannerArray[20];
 	int bannerIndex;
 
 	/*
 	 * Drawing commands
      */
+
+
+    void displayCard(int x, int y, int suit, int number, int printAtt);
+
+
     // display a card on the screen
 	void displayginCard(int x, int y, int suit, int number, int printAtt);
 	// erase in the shape of a box on the screen
