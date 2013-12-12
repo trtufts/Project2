@@ -3,10 +3,10 @@ ECE 373 Project 2
 Royal Crown Casino - Multigame Executable
 
 Authors:
-Timothy Tufts,
-Brian Hickey,
-Stefan Totino,
-Jimmy Danis
+Timothy Tufts (Menu),
+Brian Hickey (Gin integration),
+Stefan Totino (Poker integration),
+Jimmy Danis (Go Fish integration)
 
 Assignment Description:
 A Las Vegas gambling company, Royal Crown Casinos, started an 
@@ -16,6 +16,8 @@ anticipated. They have decided to monetize their system immediately. The develop
 of the original card games have all been asked to integrate their card games into a 
 single combined interface with advertising and a credit system integrated into each 
 game. A number of other features have also been requested.
+
+Take your games from project 1 and integrate them into a single executable menu.
 
 
 Features:
